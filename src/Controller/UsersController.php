@@ -104,6 +104,7 @@ class UsersController extends AppController
             return null;
         }
         $chatId = $auth_data['id'];
+        $this->log('Telegram chat id: ' . $chatId, 'debug');
         return $chatId;
     }
 }
