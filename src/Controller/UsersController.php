@@ -35,6 +35,7 @@ class UsersController extends AppController
         if ($this->request->is('json') && $this->request->is('post')) {
             // login con telegram da prenota classico
             $auth_data = (array)json_decode($this->request->getData('user'));
+            $this->log('Auth_data: ' . $auth_data, 'debug');
             unset($auth_data['url']);
             $telegram_chat_id = $this->check_telegram_authorization($auth_data);
 
