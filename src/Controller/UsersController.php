@@ -35,7 +35,7 @@ class UsersController extends AppController
         if ($this->request->is('json') && $this->request->is('post')) {
             // login con telegram da prenota classico
             $auth_data = (array)json_decode($this->request->getData('user'));
-            $this->log('Auth_datag: ' . json_encode($auth_data), 'debug');
+            $this->log('Auth_data: ' . json_encode($auth_data), 'debug');
             unset($auth_data['url']);
             $telegram_chat_id = $this->check_telegram_authorization($auth_data);
 
@@ -98,10 +98,12 @@ class UsersController extends AppController
         $hash = hash_hmac('sha256', $data_check_string, $secret_key);
 
         if (strcmp($hash, $check_hash) !== 0) {
+            $this->log('Telegram id non corrisponde all $hash', 'error');
             return null;
         }
 
         if ((time() - $auth_data['auth_date']) > 86400) {
+            $this->log('Telegram id scaduto', 'error');
             return null;
         }
         $chatId = $auth_data['id'];
