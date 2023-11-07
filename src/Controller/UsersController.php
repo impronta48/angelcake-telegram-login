@@ -7,6 +7,9 @@ namespace TelegramLogin\Controller;
 use Cake\Core\Configure;
 use Cake\Routing\Router;
 use App\Controller\AppController;
+use App\Model\Entity\User;
+use ArrayObject;
+use Authentication\Identity;
 
 /**
  * Users Controller
@@ -44,28 +47,39 @@ class UsersController extends AppController
                 $this->redirect($this->referer());
             }
 
-            $user = $this->Users->find()->where(['telegram_chat_id' => $telegram_chat_id])->first();
+            //Get the dbconnection
+            $connection = $this->Users->getConnection();
+            if ($connection->isConnected()) {
+                $user = $this->Users->find()->where(['telegram_chat_id' => $telegram_chat_id])->first();
+            } else {
+                $users = Configure::read('Telegram.Users');
+                //Prima cerco per username
+                if(isset($auth_data['username']) && isset($users[$auth_data['username']])) {
+                    $user = new User($users[$auth_data['username']]);
+                } else if (isset($users[$telegram_chat_id])){
+                    $user = new User($users[$telegram_chat_id]);
+                } else {
+                    $user = null;
+                }
+            }            
+            
             if (!empty($user)) {
                 //login andato bene
-
+                $this->Authentication->setIdentity($user);
                 $session = $this->request->getSession();
-                $session->write('Auth', $user);
-                $event = $this->dispatchEvent(self::EVENT_AFTER_IDENTIFY, ['user' => $user, 'response' => $this->response]);
-                $result = $event->getResult();
+                $session->write('Auth', $user);                
+                //$event = $this->dispatchEvent(self::EVENT_AFTER_IDENTIFY, ['user' => $user, 'response' => $this->response]);
+                //$result = $event->getResult();
 
-                if ($result !== null) {
+/*                 if ($result !== null) {
                     $user  = $result['user'];
                     $response  = $result['response'];
-                }
+                } */
 
                 $res = [
                     'success' => true,
                     'redirectURL' => Router::url('/admin', true),
                 ];
-
-                /*$this->set('response', $res);
-                $this->viewBuilder()->setOption('serialize', ['response']);
-                return $response;*/
                 $this->set(compact('res'));
                 $this->viewBuilder()->setOption('serialize', 'res');
             } else {
