@@ -46,10 +46,9 @@ class UsersController extends AppController
             }
 
             //Get the dbconnection
-            $connection = $this->Users->getConnection();
-            if ($connection->getDriver()->isConnected()) {
-                $user = $this->Users->find()->where(['telegram_chat_id' => $telegram_chat_id])->first();
-            } else {
+            $user = $this->Users->find()->where(['telegram_chat_id' => $telegram_chat_id])->first();
+
+            if (empty($user)){
                 $users = Configure::read('Telegram.Users');
                 //Prima cerco per username
                 if(isset($auth_data['username']) && isset($users[$auth_data['username']])) {
