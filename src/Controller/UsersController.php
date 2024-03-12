@@ -8,8 +8,6 @@ use Cake\Core\Configure;
 use Cake\Routing\Router;
 use App\Controller\AppController;
 use App\Model\Entity\User;
-use ArrayObject;
-use Authentication\Identity;
 
 /**
  * Users Controller
@@ -49,7 +47,7 @@ class UsersController extends AppController
 
             //Get the dbconnection
             $connection = $this->Users->getConnection();
-            if ($connection->isConnected()) {
+            if ($connection->getDriver()->isConnected()) {
                 $user = $this->Users->find()->where(['telegram_chat_id' => $telegram_chat_id])->first();
             } else {
                 $users = Configure::read('Telegram.Users');
@@ -67,14 +65,16 @@ class UsersController extends AppController
                 //login andato bene
                 $this->Authentication->setIdentity($user);
                 $session = $this->request->getSession();
-                $session->write('Auth', $user);                
+                $session->write('Auth', $user);     
+                
+                //Spengo l'evento perchè mi dà errore, non ho capito bene perchè
                 //$event = $this->dispatchEvent(self::EVENT_AFTER_IDENTIFY, ['user' => $user, 'response' => $this->response]);
                 //$result = $event->getResult();
 
-/*                 if ($result !== null) {
-                    $user  = $result['user'];
-                    $response  = $result['response'];
-                } */
+                //if ($result !== null) {
+                //    $user  = $result['user'];
+                //    $response  = $result['response'];
+                //} 
 
                 $res = [
                     'success' => true,
@@ -83,8 +83,17 @@ class UsersController extends AppController
                 $this->set(compact('res'));
                 $this->viewBuilder()->setOption('serialize', 'res');
             } else {
-                $this->Flash->error('Utente associato a telegram non trovato!');
-                $this->redirect($this->referer());
+                if ($this->request->is('json')) {
+                    $res = [
+                        'success' => false,
+                        'message' => 'Utente associato a telegram non trovato!',
+                    ];
+                    $this->set(compact('res'));
+                    $this->viewBuilder()->setOption('serialize', 'res');
+                } else {
+                    $this->Flash->error('Utente associato a telegram non trovato!');
+                    $this->redirect($this->referer());
+                }
             }
         }
     }

@@ -1,3 +1,5 @@
+import {vueTelegramLogin} from 'vue-telegram-login'
+
 var app = new Vue({
     el: '#app',
     components: {vueTelegramLogin},
@@ -9,7 +11,8 @@ var app = new Vue({
     },
     data: function () {
       return {
-        
+        showMobile: false,
+        loading: true,
       };
     },
     computed: {
@@ -17,14 +20,13 @@ var app = new Vue({
       
     },
     methods: {
-        async telegramLogin(user){
-            
+        async telegramLogin(user){            
             const data = new FormData()
             data.append('user', JSON.stringify(user))
             let response = await axios.post('/login.json', data)
             console.log("response telegramLogin", response)
             if(response.data.success) {    
-              console.log("redirectURL", response.data.redirectURL)            
+                console.log("redirectURL", response.data.redirectURL)            
                 window.location.href = response.data.redirectURL
             }
         }

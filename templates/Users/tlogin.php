@@ -1,11 +1,8 @@
 <?php
-
 use Cake\Core\Configure;
 
+$this->assign('vue', 'mix');
 ?>
-
-<?= $this->Html->script('https://unpkg.com/vue-telegram-login', ['block' => true]) ?>
-
 
 <div class="col-md-4 offset-md-4">
   <div class="card">
