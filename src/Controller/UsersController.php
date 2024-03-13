@@ -46,7 +46,12 @@ class UsersController extends AppController
             }
 
             //Get the dbconnection
-            $user = $this->Users->find()->where(['telegram_chat_id' => $telegram_chat_id])->first();
+            try {
+                $user = $this->Users->find()->where(['telegram_chat_id' => $telegram_chat_id])->first();
+            } catch (\Throwable $th) {
+                $user = null;
+            }
+            
 
             if (empty($user)){
                 $users = Configure::read('Telegram.Users');
